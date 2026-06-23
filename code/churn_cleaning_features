@@ -1,0 +1,65 @@
+require(readr)
+install.packages("readr")
+library(readr)
+library(dplyr)
+require(tidyr)
+library(tidyr)
+#=============== Importing the dataset ===============#
+churn_data <- read_csv("C:/Users/HP/Documents/Customer churn dashboard project/archive/WA_Fn-UseC_-Telco-Customer-Churn.csv",
+                       col_types = cols(TotalCharges = col_character()))
+
+
+#=============== Checking the data ===============#
+summary(churn_data)
+str(churn_data)
+#=============== Cleaning TotalCharges ===============#
+churn_data <- churn_data %>%
+  mutate(TotalCharges = na_if(TotalCharges, " ")) %>%
+  mutate(TotalCharges = as.numeric(TotalCharges)) %>%
+  drop_na(TotalCharges)
+
+#=============== Recode Churn ===============#
+churn_data <- churn_data %>%
+  mutate(Churn_flag = ifelse(Churn == "Yes", 1, 0))
+
+#=============== Feature 1: Tenure Groups ===============#
+churn_data <- churn_data %>%
+  mutate(TenureGroup = case_when(
+    tenure <= 12 ~ "0-12 months",
+    tenure <= 24 ~ "13-24 months",
+    tenure <= 48 ~ "25-48 months",
+    tenure <= 72 ~ "49-72 months",
+    TRUE ~ "73+ months"
+  ))
+
+#=============== Feature 2: Average Charges per Month ===============#
+churn_data <- churn_data %>%
+  mutate(AvgChargesPerMonth = ifelse(tenure > 0, TotalCharges / tenure, NA))
+
+#=============== Feature 3: InternetService Dummies ===============#
+churn_data <- churn_data %>%
+  mutate(DSL_flag = ifelse(InternetService == "DSL", 1, 0),
+         Fiber_flag = ifelse(InternetService == "Fiber optic", 1, 0),
+         NoInternet_flag = ifelse(InternetService == "No", 1, 0))
+
+#=============== Feature 4: Contract Type Flags ===============#
+churn_data <- churn_data %>%
+  mutate(MonthToMonth_flag = ifelse(Contract == "Month-to-month", 1, 0),
+         OneYear_flag = ifelse(Contract == "One year", 1, 0),
+         TwoYear_flag = ifelse(Contract == "Two year", 1, 0))
+
+#=============== Feature 5: Payment Method Grouping ===============#
+churn_data <- churn_data %>%
+  mutate(PaymentGroup = ifelse(PaymentMethod == "Electronic check", "Electronic", "Manual"))
+
+#=============== Feature 6: SeniorCitizen Flag ===============#
+# Already numeric (0 = No, 1 = Yes), can be used directly
+
+#=============== Feature 7: Service Bundle Flag ===============#
+churn_data <- churn_data %>%
+  mutate(Bundle_flag = ifelse(PhoneService == "Yes" & StreamingTV == "Yes" & StreamingMovies == "Yes", 1, 0))
+
+#=============== Final Verification ===============#
+summary(churn_data)
+table(churn_data$TenureGroup, churn_data$Churn_flag)
+table(churn_data$Contract, churn_data$Churn_flag)
