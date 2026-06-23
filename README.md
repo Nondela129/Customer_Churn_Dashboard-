@@ -31,10 +31,7 @@ Customer_Churn_Dashboard-/
 - LinkedIn – Professional showcase
 ## 🚀 How to Run This Project
 
-### 1. Clone the Repository
-```bash
-git clone https://github.com/Nondela129/Customer_Churn_Dashboard-.git
-cd Customer_Churn_Dashboard-
+
 2. Prepare the Data
 Place raw datasets in the /data folder.
 
